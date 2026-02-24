@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Center - Control y Cotizador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%23f78166%22 d=%22M416 160c0-17.7 14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32s-32-14.3-32-32zM336 80c0-17.7 14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32s-32-14.3-32-32zm64 128c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32zM168 0C154.7 0 144 10.7 144 24V64H272V24c0-13.3-10.7-24-24-24H168zM64 128c-17.7 0-32 14.3-32 32v64 32v64 64V480c0 17.7 14.3 32 32 32H352c17.7 0 32-14.3 32-32V384 320 256 224 160c0-17.7-14.3-32-32-32H64zm144 224a56 56 0 1 1 0-112 56 56 0 1 1 0 112z%22/></svg>">
+</head>
+
+<body>
+    <div id="app">
+        <!-- HEADER / NAVBAR -->
+        <header class="navbar">
+            <div class="logo">
+                <i class="fas fa-spray-can"></i>
+                <h1>COLOR CENTER</h1>
+            </div>
+            <nav>
+                <button class="nav-btn active" onclick="app.navigate('home')"><i class="fas fa-home"></i>
+                    Inicio</button>
+                <button class="nav-btn" onclick="app.navigate('cotizador')"><i class="fas fa-calculator"></i>
+                    Cotizador</button>
+                <button class="nav-btn" onclick="app.navigate('control')"><i class="fas fa-clipboard-list"></i> Control
+                    Mes</button>
+                <button class="nav-btn" onclick="app.navigate('dashboard')"><i class="fas fa-chart-pie"></i>
+                    Dashboard</button>
+                <button class="nav-btn" onclick="app.navigate('config')"><i class="fas fa-cog"></i>
+                    Configuración</button>
+            </nav>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main id="main-content">
+            <!-- HOME VIEW -->
+            <section id="view-home" class="view active">
+                <div class="hero">
+                    <h2>Bienvenido a Color Center</h2>
+                    <p>Seleccione una opción para comenzar</p>
+                    <div class="hero-cards">
+                        <div class="card glass-effect hover-scale" onclick="app.navigate('cotizador')">
+                            <i class="fas fa-calculator hero-icon"></i>
+                            <h3>Cotizador Inteligente</h3>
+                            <p>Cotiza trabajos de enderezado y pintura de forma dinámica.</p>
+                        </div>
+                        <div class="card glass-effect hover-scale" onclick="app.navigate('control')">
+                            <i class="fas fa-clipboard-list hero-icon"></i>
+                            <h3>Control Mensual</h3>
+                            <p>Gestión de comisiones por técnico y control de trabajos.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COTIZADOR VIEW -->
+            <section id="view-cotizador" class="view">
+                <h2><i class="fas fa-calculator"></i> Cotizador Inteligente</h2>
+                <div class="glass-container mt-4" style="text-align: center; padding: 50px;">
+                    <i class="fas fa-tools fa-3x" style="color:var(--text-secondary)"></i>
+                    <p class="mt-4" style="color:var(--text-secondary)">Módulo en construcción...</p>
+                </div>
+            </section>
+
+            <!-- CONTROL MENSUAL VIEW -->
+            <section id="view-control" class="view">
+                <div class="header-action">
+                    <h2><i class="fas fa-clipboard-list"></i> Control Mensual de Trabajos</h2>
+                    <button class="btn btn-primary" onclick="control.showNewOrderModal()"><i class="fas fa-plus"></i>
+                        Nueva OT</button>
+                </div>
+
+                <div class="filters glass-container mb-4">
+                    <div class="form-row" style="margin:0;">
+                        <div class="form-group">
+                            <label>Periodo (Mes):</label>
+                            <select id="filter-month" onchange="control.renderOrders()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quincena:</label>
+                            <select id="filter-fortnight" onchange="control.renderOrders()">
+                                <option value="both">Mes Completo</option>
+                                <option value="1">Primera Quincena (1-15)</option>
+                                <option value="2">Segunda Quincena (16-31)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Vista:</label>
+                            <select id="filter-view" onchange="control.renderOrders()">
+                                <option value="general">Vista General</option>
+                                <option value="detallada">Vista Detallada</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Técnico:</label>
+                            <select id="filter-tech" onchange="control.renderOrders()">
+                                <!-- Llenado por JS -->
+                            </select>
+                        </div>
+                        <div class="form-group" style="justify-content: flex-end;">
+                            <button class="btn btn-outline" onclick="window.print()" style="height: 40px;"><i
+                                     class="fas fa-print"></i> Imprimir</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container glass-container mt-4">
+                    <table class="modern-table" id="table-general">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>OT</th>
+                                <th>Vehículo y Color</th>
+                                <th>Placa</th>
+                                <th>Total Cliente</th>
+                                <th>Total Comisiones</th>
+                                <th style="text-align: center;">Operada
+                                    <br>
+                                    <input type="file" id="rectify-file-input" accept=".xlsx, .xls"
+                                        style="display: none;" onchange="control.processRectify(event)">
+                                    <button class="btn btn-outline"
+                                        style="font-size: 10px; padding: 4px 8px; margin-top: 5px; height: auto;"
+                                        onclick="document.getElementById('rectify-file-input').click()"
+                                        title="Subir Excel y rectificar">Rectificar operadas</button>
+                                </th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody-general">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
+
+                    <table class="modern-table" id="table-detallada" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Pieza</th>
+                                <th>Enderezado</th>
+                                <th>Preparado</th>
+                                <th>Pulido</th>
+                                <th>Pintura</th>
+                                <th>Extras / Otros</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody-detallada">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view">
+                <h2><i class="fas fa-chart-pie"></i> Mini Dashboard de Comisiones</h2>
+
+                <div class="glass-container mt-4 mb-4">
+                    <div class="header-action" style="margin-bottom: 20px;">
+                        <h3 style="margin:0;">Resumen del Mes</h3>
+                    </div>
+                    <div id="dashboard-metrics" class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Vehículos Atendidos</h4>
+                            <span class="metric-value" id="metric-vehiculos">0</span>
+                            <div class="meta-display" id="meta-vehiculos-display"
+                                style="font-size:12px; color:var(--text-secondary); margin-top:5px;"></div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Piezas Trabajadas</h4>
+                            <span class="metric-value" id="metric-piezas">0</span>
+                            <div class="meta-display" id="meta-piezas-display"
+                                style="font-size:12px; color:var(--text-secondary); margin-top:5px;"></div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Ingreso Total Público (Q)</h4>
+                            <span class="metric-value" id="metric-ingreso" style="color:#3fb950">Q0.00</span>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Comisiones Generadas</h4>
+                            <span class="metric-value" id="metric-comisiones" style="color:var(--accent)">Q0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-container mt-4">
+                    <div class="header-action">
+                        <h3>Comisiones a Pagar por Técnico</h3>
+                        <select id="dashboard-fortnight" class="input-dark" style="width:200px;"
+                            onchange="dashboard.init()">
+                            <option value="both">Mes Completo</option>
+                            <option value="1">Primera Quincena</option>
+                            <option value="2">Segunda Quincena</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container mt-2">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Técnico</th>
+                                    <th>Enderezado</th>
+                                    <th>Preparado</th>
+                                    <th>Pulido</th>
+                                    <th>Pintura</th>
+                                    <th>Extras</th>
+                                    <th>Total a Pagar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="commissions-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONFIG VIEW -->
+            <section id="view-config" class="view">
+                <div class="header-action">
+                    <h2><i class="fas fa-cogs"></i> Configuración de Comisiones y Metas</h2>
+                    <button class="btn btn-outline" onclick="config.changePassword()"><i class="fas fa-key"></i> Cambiar
+                        Contraseña</button>
+                </div>
+
+                <div class="glass-container mt-4 mb-4">
+                    <h3
+                        style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        Metas del Dashboard (Mensuales)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Meta de Vehículos Atendidos</label>
+                            <input type="number" id="config-meta-vehiculos" class="input-dark" min="0"
+                                onchange="config.updateGoal('vehiculos', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Meta de Piezas Trabajadas</label>
+                            <input type="number" id="config-meta-piezas" class="input-dark" min="0"
+                                onchange="config.updateGoal('piezas', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-container mt-4 mb-4">
+                    <h3
+                        style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        Respaldos del Sistema (Datos)</h3>
+                    <p style="color:var(--text-secondary); margin-bottom: 15px;">Descargue un respaldo de todos sus
+                        datos para guardarlo de forma segura o transferirlo a otra computadora. Luego puede subirlo con
+                        el botón de "Subir Respaldo".</p>
+                    <div class="form-row" style="margin: 0;">
+                        <div class="form-group" style="flex: 1;">
+                            <button class="btn btn-outline" style="width: 100%; height: 45px;"
+                                onclick="config.downloadBackup()">
+                                <i class="fas fa-download"></i> Descargar Respaldo JSON
+                            </button>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <input type="file" id="restore-file-input" accept=".json" style="display: none;"
+                                onchange="config.processRestore(event)">
+                            <button class="btn btn-outline"
+                                style="width: 100%; height: 45px; border-color: var(--accent); color: var(--accent);"
+                                onclick="document.getElementById('restore-file-input').click()">
+                                <i class="fas fa-upload"></i> Subir y Restaurar JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-action" style="margin-top: 30px;">
+                    <h3>Pago a Técnicos</h3>
+                    <button class="btn btn-primary" onclick="config.addTech()"><i class="fas fa-plus"></i> Nuevo
+                        Técnico</button>
+                </div>
+                <div class="glass-container mt-4">
+                    <p style="color:var(--text-secondary); margin-bottom: 20px;">Establece el monto a pagar por tipo de
+                        trabajo para cada técnico. Los montos se aplicarán automáticamente a las nuevas Órdenes de
+                        Trabajo.</p>
+                    <div class="table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Técnico</th>
+                                    <th>Enderezado (Q)</th>
+                                    <th>Preparado (Q)</th>
+                                    <th>Pulido (Q)</th>
+                                    <th>Pintura (Q)</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="config-tech-tbody">
+                                <!-- JS fill -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div id="ot-modal" class="modal-overlay">
+        <div class="modal glass-effect">
+            <div class="modal-header">
+                <h3 id="modal-title">Registrar Trabajo de Vehículo</h3>
+                <button class="close-btn" onclick="control.closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="ot-form" onsubmit="event.preventDefault(); control.saveOrder();">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="ot-fecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label>No. OT</label>
+                            <input type="text" id="ot-number" required placeholder="Ej: OT-0012">
+                        </div>
+                        <div class="form-group">
+                            <label>Vehículo y Color</label>
+                            <input type="text" id="ot-vehiculo-color" required placeholder="Ej: Yaris Rojo">
+                        </div>
+                        <div class="form-group">
+                            <label>Placa Vehículo</label>
+                            <input type="text" id="ot-placa" required placeholder="Ej: P123ABC">
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <h4>Desglose de Piezas</h4>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="control.addPiece()">
+                            <i class="fas fa-plus"></i> Añadir Pieza
+                        </button>
+                    </div>
+
+                    <div id="pieces-container"></div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-text" onclick="control.closeModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar OT</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <template id="piece-template">
+        <div class="piece-card glass-container mb-4">
+            <div class="piece-header form-row" style="align-items: flex-end; margin-bottom: 10px;">
+                <div class="form-group" style="flex:2;">
+                    <label>Nombre Pieza (Ej. Pintura de lodera)</label>
+                    <input type="text" class="piece-name input-dark" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Precio Público (Q)</label>
+                    <input type="number" class="piece-price input-dark" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <div class="form-group" style="flex:0; padding-bottom: 8px;">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="control.removePiece(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="labors-container" style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px;">
+                <div class="labor-row header-row"
+                    style="display: flex; gap: 10px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 8px;">
+                    <span style="width: 80px; text-align: center;">Cant.</span>
+                    <span style="flex:2;">Tipo Servicio</span>
+                    <span style="flex:2;">Técnico</span>
+                    <span style="flex:3.5;">Comisión / Desc. Extra</span>
+                    <span style="flex:0; width: 30px;"></span>
+                </div>
+                <div class="labors-list"></div>
+
+                <button type="button" class="btn btn-outline btn-sm mt-3" onclick="control.addLabor(this)">
+                    <i class="fas fa-plus-circle"></i> Asignar Tarea/Comisión
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <template id="labor-template">
+        <div class="labor-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+            <select class="labor-qty input-dark" style="width: 80px; padding: 10px 5px; text-align: center;"
+                title="Proporción (ej. Doble o Mitad)" required>
+                <option value="0.5">½ Pieza</option>
+                <option value="1" selected>1 (Normal)</option>
+                <option value="1.5">1½</option>
+                <option value="2">2 (Doble)</option>
+                <option value="3">3 (Triple)</option>
+            </select>
+            <select class="labor-type input-dark" style="flex:2;" required>
+                <option value="enderezado">Enderezado</option>
+                <option value="preparado">Preparado</option>
+                <option value="pulido">Pulido</option>
+                <option value="pintura">Pintura</option>
+                <option value="extra">Extra</option>
+            </select>
+            <select class="labor-tech input-dark" style="flex:2;" required>
+                <!-- Carga dinámica por JS -->
+            </select>
+            <div style="flex:3.5; display:flex; gap:10px; align-items:center;">
+                <input class="labor-amount input-dark" type="number" placeholder="P. Unit." min="0" step="0.01"
+                    style="width: 80px; display:none;">
+                <span class="labor-amount-display"
+                    style="color:var(--accent); font-weight:bold; font-size: 15px; min-width:60px;">Q 0.00</span>
+                <input class="labor-desc input-dark extra-desc" type="text" placeholder="Detalles extra..."
+                    style="flex:1; display:none;">
+            </div>
+            <button type="button" class="btn-icon text-danger" style="flex:0; margin-left:10px;"
+                onclick="this.parentElement.remove()">
+                <i class="fas fa-times-circle"></i>
+            </button>
+        </div>
+    </template>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
