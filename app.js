@@ -37,12 +37,14 @@ const saveState = async () => {
     if (supabase) {
         try {
             await supabase.from('color_center_data').upsert([
-                { id: 1, section: 'all_data', content: { 
-                    orders: state.orders, 
-                    techs: state.technicians, 
-                    goals: state.goals, 
-                    password: state.adminPassword 
-                }}
+                {
+                    id: 1, section: 'all_data', content: {
+                        orders: state.orders,
+                        techs: state.technicians,
+                        goals: state.goals,
+                        password: state.adminPassword
+                    }
+                }
             ]);
         } catch (e) {
             console.error("Error al sincronizar con Supabase:", e);
@@ -64,7 +66,7 @@ const loadFromSupabase = async () => {
             state.technicians = data.content.techs || {};
             state.goals = data.content.goals || { vehiculos: 0, piezas: 0 };
             state.adminPassword = data.content.password || '0502';
-            
+
             // Actualizar localStorage también
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
             localStorage.setItem(STORAGE_KEY + '_techs', JSON.stringify(state.technicians));
@@ -813,6 +815,12 @@ const config = {
 
 // Inicialización de Eventos DOM
 document.addEventListener('DOMContentLoaded', async () => {
+    // Exponer módulos al ámbito global para los eventos onclick del HTML
+    window.app = app;
+    window.control = control;
+    window.dashboard = dashboard;
+    window.config = config;
+
     // Mostrar indicador de carga si fuera necesario
     if (supabase) {
         await loadFromSupabase();
