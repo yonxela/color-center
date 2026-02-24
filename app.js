@@ -1,6 +1,6 @@
 // Configuración de Supabase
 const SUPABASE_URL = 'https://oqlonlkudzvzpakswmjv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_2MsTrkgtzcD6WAS9g44Dtg_EIK_';
+const SUPABASE_KEY = 'sb_publishable_2MsTrkgtzcD6WAS9g44Dtg_EIKEeWUa';
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 // Estado y persistencia
