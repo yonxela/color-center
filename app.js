@@ -1,3 +1,8 @@
+// Configuración de Supabase
+const SUPABASE_URL = 'https://rxrodfskmvldozpznyrp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_rm-U3aeXydu4W0wdSMLW5w_I4LIW5MO';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
 // Estado y persistencia
 const STORAGE_KEY = 'colorCenter_v1';
 let storedTechs = JSON.parse(localStorage.getItem(STORAGE_KEY + '_techs'));
@@ -14,7 +19,8 @@ const state = {
     technicians: storedTechs,
     goals: JSON.parse(localStorage.getItem(STORAGE_KEY + '_goals')) || { vehiculos: 0, piezas: 0 },
     adminPassword: localStorage.getItem(STORAGE_KEY + '_pwd') || '0502',
-    currentView: 'home'
+    currentView: 'home',
+    isSyncing: false
 };
 
 const formatMoney = (amount) => 'Q ' + parseFloat(amount).toFixed(2);
@@ -22,11 +28,52 @@ const getMonthYear = (dateStr) => {
     const d = new Date(dateStr);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
-const saveState = () => {
+const saveState = async () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
     localStorage.setItem(STORAGE_KEY + '_techs', JSON.stringify(state.technicians));
     localStorage.setItem(STORAGE_KEY + '_goals', JSON.stringify(state.goals));
     localStorage.setItem(STORAGE_KEY + '_pwd', state.adminPassword);
+
+    if (supabase) {
+        try {
+            await supabase.from('color_center_data').upsert([
+                { id: 1, section: 'all_data', content: { 
+                    orders: state.orders, 
+                    techs: state.technicians, 
+                    goals: state.goals, 
+                    password: state.adminPassword 
+                }}
+            ]);
+        } catch (e) {
+            console.error("Error al sincronizar con Supabase:", e);
+        }
+    }
+};
+
+const loadFromSupabase = async () => {
+    if (!supabase) return;
+    try {
+        const { data, error } = await supabase
+            .from('color_center_data')
+            .select('content')
+            .eq('id', 1)
+            .single();
+
+        if (data && data.content) {
+            state.orders = data.content.orders || [];
+            state.technicians = data.content.techs || {};
+            state.goals = data.content.goals || { vehiculos: 0, piezas: 0 };
+            state.adminPassword = data.content.password || '0502';
+            
+            // Actualizar localStorage también
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.orders));
+            localStorage.setItem(STORAGE_KEY + '_techs', JSON.stringify(state.technicians));
+            localStorage.setItem(STORAGE_KEY + '_goals', JSON.stringify(state.goals));
+            localStorage.setItem(STORAGE_KEY + '_pwd', state.adminPassword);
+        }
+    } catch (e) {
+        console.error("Error al cargar de Supabase:", e);
+    }
 };
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -765,6 +812,10 @@ const config = {
 };
 
 // Inicialización de Eventos DOM
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Mostrar indicador de carga si fuera necesario
+    if (supabase) {
+        await loadFromSupabase();
+    }
     app.navigate('home');
 });
