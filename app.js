@@ -55,7 +55,9 @@ var saveState = async function () {
 
     if (supabase) {
         try {
-            await supabase.from('color_center_data').upsert([
+            state.isSyncing = true;
+            document.querySelectorAll('.sync-status').forEach(el => el.innerHTML = '<i class="fas fa-spinner fa-spin text-warning"></i> Sincronizando...');
+            const { error } = await supabase.from('color_center_data').upsert([
                 {
                     id: 1, section: 'all_data', content: {
                         orders: state.orders,
@@ -65,8 +67,17 @@ var saveState = async function () {
                     }
                 }
             ]);
+            state.isSyncing = false;
+            if (error) {
+                console.error("Error Supabase upsert:", error);
+                document.querySelectorAll('.sync-status').forEach(el => el.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> Error en nube');
+            } else {
+                document.querySelectorAll('.sync-status').forEach(el => el.innerHTML = '<i class="fas fa-cloud text-success"></i> Nube actualizada');
+            }
         } catch (e) {
-            console.error("Error al sincronizar con Supabase:", e);
+            state.isSyncing = false;
+            console.error("Error de red al sincronizar con Supabase:", e);
+            document.querySelectorAll('.sync-status').forEach(el => el.innerHTML = '<i class="fas fa-wifi text-danger"></i> Sin conexión');
         }
     }
 };
@@ -74,8 +85,20 @@ var saveState = async function () {
 var loadFromSupabase = async function () {
     if (!supabase) return;
     try {
-        var result = await supabase.from('color_center_data').select('content').eq('id', 1).single();
-        var data = result.data;
+        const result = await supabase.from('color_center_data').select('content').eq('id', 1).single();
+        if (result.error && result.error.code === 'PGRST116') {
+            // No hay datos, la nube está vacía. Si hay contenido local, súbelo a la nube.
+            if (state.orders.length > 0 || Object.keys(state.technicians).length > 1 || state.goals.vehiculos > 0) {
+                console.log("Nube vacía, subiendo datos locales por defecto.");
+                await saveState();
+            }
+            return;
+        } else if (result.error) {
+            console.error("Error consultando Supabase:", result.error);
+            return;
+        }
+
+        const data = result.data;
         if (data && data.content) {
             state.orders = data.content.orders || [];
             state.technicians = data.content.techs || {};
@@ -88,7 +111,7 @@ var loadFromSupabase = async function () {
             localStorage.setItem(STORAGE_KEY + '_pwd', state.adminPassword);
         }
     } catch (e) {
-        console.error("Error al cargar de Supabase:", e);
+        console.error("Error de red al cargar de Supabase:", e);
     }
 };
 
@@ -856,3 +879,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.app.navigate('home');
     }
 });
+

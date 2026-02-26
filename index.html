@@ -16,9 +16,11 @@
     <div id="app-container">
         <!-- HEADER / NAVBAR -->
         <header class="navbar">
-            <div class="logo">
+            <div class="logo" style="display:flex; align-items:center;">
                 <i class="fas fa-spray-can"></i>
                 <h1>COLOR CENTER</h1>
+                <span class="sync-status"
+                    style="font-size: 13px; margin-left: 15px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px;"></span>
             </div>
             <nav>
                 <button class="nav-btn active" onclick="app.navigate('home')"><i class="fas fa-home"></i>
@@ -261,6 +263,12 @@
                                 style="width: 100%; height: 45px; border-color: var(--accent); color: var(--accent);"
                                 onclick="document.getElementById('restore-file-input').click()">
                                 <i class="fas fa-upload"></i> Subir y Restaurar JSON
+                            </button>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <button class="btn btn-primary" style="width: 100%; height: 45px;"
+                                onclick="window.saveState()">
+                                <i class="fas fa-sync-alt"></i> Forzar Sincronización
                             </button>
                         </div>
                     </div>
